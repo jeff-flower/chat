@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require("apollo-server");
+const { ApolloServer, gql, PubSub } = require("apollo-server");
 
 // TODO:
 // subscription: messages (subscribe to all messages for now)
@@ -22,6 +22,10 @@ const typeDefs = gql`
   type Mutation {
     sendMessage(from: String!, to: String!, text: String!): Message!
   }
+
+  type Subscription {
+    newMessage: Message
+  }
 `;
 
 const users = [
@@ -41,6 +45,8 @@ const messages = [
   }
 ];
 
+const pubsub = new PubSub();
+
 const resolvers = {
   Query: {
     users: () => users,
@@ -51,7 +57,13 @@ const resolvers = {
       const { from, to, text } = args;
       const newMessage = { from, to, text };
       messages.push(newMessage);
+      pubsub.publish("newMessage", { newMessage });
       return newMessage;
+    }
+  },
+  Subscription: {
+    newMessage: {
+      subscribe: () => pubsub.asyncIterator("newMessage")
     }
   }
 };
