@@ -1,4 +1,4 @@
-const { ApolloServer, gql, PubSub } = require("apollo-server");
+const { ApolloServer, gql, PubSub, withFilter } = require("apollo-server");
 
 // TODO: add date to message and sort by date to get consistent conversation history?
 const typeDefs = gql`
@@ -24,7 +24,7 @@ const typeDefs = gql`
   }
 
   type Subscription {
-    newMessage: Message
+    newMessageInConversation(from: String!, to: String!): Message
   }
 `;
 
@@ -64,13 +64,18 @@ const resolvers = {
       const { from, to, text } = args;
       const newMessage = { from, to, text };
       messages.push(newMessage);
-      pubsub.publish("newMessage", { newMessage });
+      pubsub.publish("newMessage", { newMessageInConversation: newMessage });
       return newMessage;
     }
   },
   Subscription: {
-    newMessage: {
-      subscribe: () => pubsub.asyncIterator("newMessage")
+    newMessageInConversation: {
+      subscribe: withFilter(
+        () => pubsub.asyncIterator("newMessage"),
+        (payload, variables) =>
+          payload.newMessageInConversation.from === variables.from &&
+          payload.newMessageInConversation.to === variables.to
+      )
     }
   }
 };
