@@ -16,14 +16,17 @@ const typeDefs = gql`
     users: [User]
     "allMessages is here for debugging, not actually used by client"
     allMessages: [Message]
+    "all messages between two users"
     conversationHistory(user1: String!, user2: String!): [Message]
   }
 
   type Mutation {
+    "send a message between two users"
     sendMessage(from: String!, to: String!, text: String!): Message!
   }
 
   type Subscription {
+    "subscribe to new messages sent from a specific user to a specific user"
     newMessageInConversation(from: String!, to: String!): Message
   }
 `;
@@ -79,6 +82,8 @@ const resolvers = {
     }
   }
 };
+
+// Subscriptions/Filtering subscriptions: https://www.apollographql.com/docs/apollo-server/data/subscriptions/#subscriptions-example
 
 const server = new ApolloServer({ typeDefs, resolvers });
 
