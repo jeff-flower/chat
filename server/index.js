@@ -1,8 +1,6 @@
 const { ApolloServer, gql, PubSub } = require("apollo-server");
 
-// TODO:
-// subscription: messages (subscribe to all messages for now)
-
+// TODO: add date to message and sort by date to get consistent conversation history?
 const typeDefs = gql`
   type User {
     name: String!
@@ -16,7 +14,9 @@ const typeDefs = gql`
 
   type Query {
     users: [User]
+    "allMessages is here for debugging, not actually used by client"
     allMessages: [Message]
+    conversationHistory(user1: String!, user2: String!): [Message]
   }
 
   type Mutation {
@@ -50,7 +50,14 @@ const pubsub = new PubSub();
 const resolvers = {
   Query: {
     users: () => users,
-    allMessages: () => messages
+    allMessages: () => messages,
+    conversationHistory: (parent, args) => {
+      const { user1, user2 } = args;
+      return messages.filter(
+        ({ from, to }) =>
+          from === user1 || from === user2 || to === user1 || to === user2
+      );
+    }
   },
   Mutation: {
     sendMessage: (parent, args) => {
