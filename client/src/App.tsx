@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 
 import {Contacts} from './Contacts'
+import {Messenger} from './Messenger';
 
 import './App.css';
 
@@ -42,6 +43,7 @@ const App: React.FC = () => {
       )}
       {userName && <p>{`Welcome ${userName}!`}</p>}
       {userName && <Contacts contacts={userData!.users.filter(user => user.name !== userName)} onContactSelection={(name: string) => setContact(name)} />}
+      {contact && <Messenger from={userName} to={contact}/>}
     </div>
   );
 }
