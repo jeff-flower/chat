@@ -3,6 +3,8 @@ import React, {useState} from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 
+import {Contacts} from './Contacts'
+
 import './App.css';
 
 const GET_USERS = gql`
@@ -13,7 +15,7 @@ const GET_USERS = gql`
   }
 `;
 
-interface User {
+export interface User {
   name: string;
 }
 
@@ -22,22 +24,24 @@ interface UserQueryData {
 }
 
 const App: React.FC = () => {
-  const [userName, setUserName] = useState<String>('');
-  const {loading, data} = useQuery<UserQueryData>(GET_USERS);
+  const [userName, setUserName] = useState<string>('');
+  const {loading, data: userData} = useQuery<UserQueryData>(GET_USERS);
+  const [contact, setContact] = useState<string>('');
 
   return (
     <div className="App">
       {loading && <p>loading...</p>}
-      {data && !userName && (
+      {userData && !userName && (
         <label>
           Who are you?
           <select value={userName} onChange={e => setUserName(e.target.value)}>
             <option value=""></option>
-            {data.users.map(user => <option value={user.name} key={user.name}>{user.name}</option>)}
+            {userData.users.map(user => <option value={user.name} key={user.name}>{user.name}</option>)}
           </select>
         </label>
       )}
       {userName && <p>{`Welcome ${userName}!`}</p>}
+      {userName && <Contacts contacts={userData!.users.filter(user => user.name !== userName)} onContactSelection={(name: string) => setContact(name)} />}
     </div>
   );
 }
