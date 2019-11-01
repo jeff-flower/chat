@@ -12,6 +12,12 @@ const typeDefs = gql`
     text: String!
   }
 
+  input SendMessageInput {
+    from: String!
+    to: String!
+    text: String!
+  }
+
   type Query {
     users: [User]
     "allMessages is here for debugging, not actually used by client"
@@ -22,7 +28,7 @@ const typeDefs = gql`
 
   type Mutation {
     "send a message between two users"
-    sendMessage(from: String!, to: String!, text: String!): Message!
+    sendMessage(message: SendMessageInput!): Message!
   }
 
   type Subscription {
@@ -64,7 +70,7 @@ const resolvers = {
   },
   Mutation: {
     sendMessage: (parent, args) => {
-      const { from, to, text } = args;
+      const { from, to, text } = args.message;
       const newMessage = { from, to, text };
       messages.push(newMessage);
       pubsub.publish("newMessage", { newMessageInConversation: newMessage });
