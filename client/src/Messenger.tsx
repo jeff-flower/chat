@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
 import gql from 'graphql-tag';
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery, useMutation } from '@apollo/react-hooks';
 
 const GET_CONVERSATION = gql`
   query chatHistory($user1: String!, $user2: String!) {
@@ -28,12 +28,31 @@ interface ConversationQueryVars {
   user2: string
 }
 
+const SEND_MESSAGE = gql`
+  mutation message ($message: SendMessageInput!) {
+    sendMessage(message: $message) {
+      from 
+      to 
+      text
+    }
+  }
+`;
+
 export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
   const [message, setMessage] = useState<string>('');
   const {loading, data} = useQuery<ConversationQueryData, ConversationQueryVars>(
     GET_CONVERSATION,
     { variables: {user1: from, user2: to}}
   );
+  const [sendMessage, { error, data: newMessage}] = useMutation<{sendMessage: Message, message: Message}>(
+    SEND_MESSAGE,
+    {variables: {message: {from, to, text: message}}}
+  );
+
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    sendMessage();
+  };
 
   return (
     <div>
@@ -45,7 +64,7 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
           </li>
         ))}
       </ul>}
-      <form onSubmit={(e) => {e.preventDefault(); console.log(`message: ${message}`)}}>
+      <form onSubmit={handleSendMessage}>
         <label>
           Message
           <textarea value={message} onChange={e => setMessage(e.target.value)} />
