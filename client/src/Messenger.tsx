@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 
 import gql from 'graphql-tag';
 import { useQuery, useMutation } from '@apollo/react-hooks';
-import { updateExpression } from '@babel/types';
 
 const GET_CONVERSATION = gql`
   query chatHistory($user1: String!, $user2: String!) {
@@ -73,8 +72,10 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
   );
 
   const handleSendMessage = (e: React.FormEvent) => {
+    // Prevent form submission from reloading page
     e.preventDefault();
     sendMessage();
+    // Clear the message value after sending
     setMessage('');
   };
 
