@@ -3,8 +3,7 @@ const { ApolloServer, gql, PubSub, withFilter } = require("apollo-server");
 // TODO: add date to message and sort by date to get consistent conversation history?
 const typeDefs = gql`
   type User {
-    name: String!
-    id: ID!
+    username: String!
   }
 
   type Message {
@@ -41,12 +40,10 @@ const typeDefs = gql`
 
 const users = [
   {
-    name: "JohnDoe",
-    id: "1"
+    username: "JohnDoe"
   },
   {
-    name: "JaneDoe",
-    id: "2"
+    username: "JaneDoe"
   }
 ];
 
