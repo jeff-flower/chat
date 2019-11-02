@@ -4,12 +4,14 @@ const { ApolloServer, gql, PubSub, withFilter } = require("apollo-server");
 const typeDefs = gql`
   type User {
     name: String!
+    id: ID!
   }
 
   type Message {
     from: String!
     to: String!
     text: String!
+    id: ID!
   }
 
   input SendMessageInput {
@@ -39,10 +41,12 @@ const typeDefs = gql`
 
 const users = [
   {
-    name: "JohnDoe"
+    name: "JohnDoe",
+    id: "1"
   },
   {
-    name: "JaneDoe"
+    name: "JaneDoe",
+    id: "2"
   }
 ];
 
@@ -50,7 +54,8 @@ const messages = [
   {
     from: "JohnDoe",
     to: "JaneDoe",
-    text: "Good Morning"
+    text: "Good Morning",
+    id: "1"
   }
 ];
 
@@ -71,7 +76,7 @@ const resolvers = {
   Mutation: {
     sendMessage: (parent, args) => {
       const { from, to, text } = args.message;
-      const newMessage = { from, to, text };
+      const newMessage = { from, to, text, id: String(messages.length + 1) };
       messages.push(newMessage);
       pubsub.publish("newMessage", { newMessageInConversation: newMessage });
       return newMessage;
