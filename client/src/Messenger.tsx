@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 
 import gql from 'graphql-tag';
 import { useQuery, useMutation } from '@apollo/react-hooks';
+import { updateExpression } from '@babel/types';
 
 const GET_CONVERSATION = gql`
   query chatHistory($user1: String!, $user2: String!) {
@@ -9,6 +10,7 @@ const GET_CONVERSATION = gql`
       text
       from
       to
+      id
     }
   }
 `;
@@ -17,6 +19,7 @@ interface Message {
   from: string;
   to: string;
   text: string;
+  id: string;
 }
 
 interface ConversationQueryData {
@@ -28,12 +31,19 @@ interface ConversationQueryVars {
   user2: string
 }
 
+interface SendMessageInput {
+  from: string;
+  to: string;
+  text: string;
+}
+
 const SEND_MESSAGE = gql`
   mutation message ($message: SendMessageInput!) {
     sendMessage(message: $message) {
       from 
       to 
       text
+      id
     }
   }
 `;
@@ -44,9 +54,22 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
     GET_CONVERSATION,
     { variables: {user1: from, user2: to}}
   );
-  const [sendMessage, { error, data: newMessage}] = useMutation<{sendMessage: Message, message: Message}>(
+  const [sendMessage, { error, data: newMessage}] = useMutation<{sendMessage: SendMessageInput, message: Message}>(
     SEND_MESSAGE,
-    {variables: {message: {from, to, text: message}}}
+    {
+      variables: {message: {from, to, text: message}},
+      update: (cache: any, {data}) => {
+        const {conversationHistory: messages} = cache.readQuery({
+          query: GET_CONVERSATION,
+          variables: {user1: from,  user2: to}
+        });
+        cache.writeQuery({
+          query: GET_CONVERSATION,
+          variables: {user1: from,  user2: to},
+          data: {conversationHistory: [...messages, data!.sendMessage]}
+        });
+      }
+    }
   );
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -59,8 +82,8 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
     <div>
       <h2>Messages</h2>
       {data && <ul>
-        {data.conversationHistory.map((message, idx) => (
-          <li key={idx}>
+        {data.conversationHistory.map(message => (
+          <li key={message.id}>
             {`${message.from}: ${message.text}`}
           </li>
         ))}

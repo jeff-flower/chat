@@ -11,13 +11,13 @@ import './App.css';
 const GET_USERS = gql`
   query allUsers {
     users {
-      name
+      username
     }
   }
 `;
 
 export interface User {
-  name: string;
+  username: string;
 }
 
 interface UserQueryData {
@@ -37,12 +37,12 @@ const App: React.FC = () => {
           Who are you?
           <select value={userName} onChange={e => setUserName(e.target.value)}>
             <option value=""></option>
-            {userData.users.map(user => <option value={user.name} key={user.name}>{user.name}</option>)}
+            {userData.users.map(user => <option value={user.username} key={user.username}>{user.username}</option>)}
           </select>
         </label>
       )}
       {userName && <p>{`Welcome ${userName}!`}</p>}
-      {userName && <Contacts contacts={userData!.users.filter(user => user.name !== userName)} onContactSelection={(name: string) => setContact(name)} />}
+      {userName && <Contacts contacts={userData!.users.filter(user => user.username !== userName)} onContactSelection={(name: string) => setContact(name)} />}
       {contact && <Messenger from={userName} to={contact}/>}
     </div>
   );
