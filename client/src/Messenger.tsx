@@ -52,6 +52,7 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     sendMessage();
+    setMessage('');
   };
 
   return (
