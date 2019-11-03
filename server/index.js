@@ -44,6 +44,9 @@ const users = [
   },
   {
     username: "JaneDoe"
+  },
+  {
+    username: "Bob"
   }
 ];
 
