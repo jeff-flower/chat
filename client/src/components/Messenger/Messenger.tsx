@@ -4,7 +4,7 @@ import {MessageList} from './MessageList';
 import {MessageForm} from './MessageForm';
 
 import gql from 'graphql-tag';
-import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks';
+import { useQuery, useMutation } from '@apollo/react-hooks';
 
 const GET_CONVERSATION = gql`
   query chatHistory($user1: String!, $user2: String!) {
@@ -73,7 +73,7 @@ interface NewMessageSubscriptionVars {
 
 
 export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
-  const {loading, data} = useQuery<ConversationQueryData, ConversationQueryVars>(
+  const {subscribeToMore, data} = useQuery<ConversationQueryData, ConversationQueryVars>(
     GET_CONVERSATION,
     { variables: {user1: from, user2: to}}
   );
@@ -93,16 +93,21 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
       }
     }
   );
-  const {error: subscriptionError} = useSubscription<NewMessageSubscriptionData, NewMessageSubscriptionVars>(
-    NEW_MESSAGE_SUBSCRIPTION,
-    {
+
+  // useCallback so this method is not recreated and called on every render in MessageList
+  const subscribeToNewMessages = React.useCallback(() => {
+    subscribeToMore({
+      document: NEW_MESSAGE_SUBSCRIPTION,
       variables: {from: to, to: from},
-      shouldResubscribe: false,
-      onSubscriptionData: (options) => {
-        console.log('onSubscriptionData', options);
+      updateQuery: (prev, {subscriptionData}: {subscriptionData: {data: {newMessageInConversation: Message}}}) => {
+        if (!subscriptionData.data) {
+          return prev;
+        }
+        const newMessage = subscriptionData.data.newMessageInConversation;
+        return {...prev, conversationHistory: [...prev.conversationHistory, newMessage]};
       }
-    }
-  );
+    });
+  }, [from, to, subscribeToMore]);
 
   const handleSendMessage = (message: string) => {
     const variables = {
@@ -120,7 +125,7 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
       <h2>Messages</h2>
       { data && 
         <>
-          <MessageList messages={data!.conversationHistory} />
+          <MessageList messages={data!.conversationHistory} subscribeToNewMessages={subscribeToNewMessages}/>
           <MessageForm sendMessage={handleSendMessage} />
         </>
       }

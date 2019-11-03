@@ -1,8 +1,12 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 
 import {Message} from './Messenger';
 
-export const MessageList: React.FC<{messages: Message[]}> = ({messages}) => {
+export const MessageList: React.FC<{messages: Message[], subscribeToNewMessages: () => void}> = ({messages, subscribeToNewMessages}) => {
+  useEffect(() => {
+    subscribeToNewMessages();
+  }, [subscribeToNewMessages]); 
+
   return (
     <ul>
       {messages.map(message => (
