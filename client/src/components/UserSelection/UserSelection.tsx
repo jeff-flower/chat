@@ -9,7 +9,11 @@ export const UserSelection: React.FC<{users: User[]; selectedUser: User['usernam
       {!selectedUser && (
         <label>
           Who are you?
-          <select value={selectedUser} onChange={e => onSelectUser(e.target.value)}>
+          <select
+            value={selectedUser}
+            onChange={e => onSelectUser(e.target.value)}
+            className="user-selection__select-user"
+          >
             <option value=""></option>
             {users.map(user => <option value={user.username} key={user.username}>{user.username}</option>)}
           </select>

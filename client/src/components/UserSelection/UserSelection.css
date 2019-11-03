@@ -2,3 +2,7 @@
   width: 300px;
   margin: auto;
 }
+
+.user-selection__select-user {
+  margin-left: 10px;
+}
