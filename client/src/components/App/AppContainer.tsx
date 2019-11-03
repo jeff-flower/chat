@@ -3,6 +3,7 @@ import React from 'react';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 
+import {User} from './';
 import {App} from './App';
 
 const GET_USERS = gql`
@@ -12,10 +13,6 @@ const GET_USERS = gql`
     }
   }
 `;
-
-export interface User {
-  username: string;
-}
 
 interface UserQueryData {
   users: User[];

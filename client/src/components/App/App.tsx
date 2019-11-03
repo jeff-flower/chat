@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 
-import {Contacts} from './Contacts'
-import {Messenger} from './Messenger';
-import {User} from './AppContainer';
+import {Contacts} from '../Contacts'
+import {Messenger} from '../Messenger';
+import {User} from './';
 
 import './App.css';
 
@@ -13,7 +13,7 @@ export const App: React.FC<{users: User[]}> = ({users}) => {
 
   return (
     <>
-      <section>
+      <div>
         {users && !userName && (
           <label>
             Who are you?
@@ -24,7 +24,7 @@ export const App: React.FC<{users: User[]}> = ({users}) => {
           </label>
         )}
         {userName && <p>{`Welcome ${userName}!`}</p>}
-      </section>
+      </div>
       {userName && <Contacts contacts={users.filter(user => user.username !== userName)} onContactSelection={(name: string) => setContact(name)} />}
       {contact && <Messenger from={userName} to={contact}/>}
     </>

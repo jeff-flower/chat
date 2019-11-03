@@ -1,6 +1,6 @@
 import React from 'react';
 
-import {User} from './AppContainer';
+import {User} from './App/';
 
 export const Contacts: React.FC<{contacts: User[], onContactSelection: (contactName: string) => void}> = ({contacts, onContactSelection}) => (
   <section>
