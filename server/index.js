@@ -69,7 +69,7 @@ const resolvers = {
       const { user1, user2 } = args;
       return messages.filter(
         ({ from, to }) =>
-          from === user1 || from === user2 || to === user1 || to === user2
+          (from === user1 || from === user2) && (to === user1 || to === user2)
       );
     }
   },
