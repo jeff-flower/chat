@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 
+import './MessageForm.css';
+
 export const MessageForm: React.FC<{sendMessage: (message: string) => void}> = ({sendMessage}) => {
   const [message, setMessage] = useState<string>('');
 
@@ -13,11 +15,12 @@ export const MessageForm: React.FC<{sendMessage: (message: string) => void}> = (
 
   return (
     <form onSubmit={handleSendMessage}>
-      <label>
-        Message
-        <textarea value={message} onChange={e => setMessage(e.target.value)} />
-      </label>
-      <button>Send</button>
+      <textarea
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        className="message-text"
+      />
+      <button>Send Message</button>
     </form>
   );
 };
