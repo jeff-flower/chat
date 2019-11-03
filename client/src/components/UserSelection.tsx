@@ -1,0 +1,20 @@
+import React from 'react';
+
+import {User} from './App';
+
+export const UserSelection: React.FC<{users: User[]; selectedUser: User['username']; onSelectUser: (userName: User['username']) => void;}> = ({users, selectedUser, onSelectUser}) => {
+  return (
+    <div>
+      {!selectedUser && (
+        <label>
+          Who are you?
+          <select value={selectedUser} onChange={e => onSelectUser(e.target.value)}>
+            <option value=""></option>
+            {users.map(user => <option value={user.username} key={user.username}>{user.username}</option>)}
+          </select>
+        </label>
+      )}
+      {selectedUser && <p>{`Welcome ${selectedUser}!`}</p>}
+    </div>
+  ); 
+};
