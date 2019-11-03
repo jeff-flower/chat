@@ -1,10 +1,11 @@
 import React from 'react';
+import { User } from '../App';
 
-import {User} from './App';
+import './UserSelection.css';
 
 export const UserSelection: React.FC<{users: User[]; selectedUser: User['username']; onSelectUser: (userName: User['username']) => void;}> = ({users, selectedUser, onSelectUser}) => {
   return (
-    <div>
+    <div className="user-selection">
       {!selectedUser && (
         <label>
           Who are you?
