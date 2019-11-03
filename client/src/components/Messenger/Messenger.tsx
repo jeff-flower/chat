@@ -131,7 +131,7 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
   };
 
   return (
-    <section>
+    <section className="main__flex-item">
       <MessageList messages={data ? data.conversationHistory : []}/>
       <MessageForm sendMessage={handleSendMessage} />
     </section>
