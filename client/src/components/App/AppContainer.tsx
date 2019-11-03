@@ -6,6 +6,8 @@ import { useQuery } from '@apollo/react-hooks';
 import {User} from './';
 import {App} from './App';
 
+import './App.css';
+
 const GET_USERS = gql`
   query allUsers {
     users {
@@ -22,7 +24,7 @@ export const AppContainer: React.FC = () => {
   const {loading, data} = useQuery<UserQueryData>(GET_USERS);
 
   return (
-    <div className="App">
+    <div className="app">
       {loading && <p>loading...</p>}
       {data && <App users={data.users} />} 
     </div>

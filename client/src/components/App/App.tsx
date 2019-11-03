@@ -5,9 +5,6 @@ import {Contacts} from '../Contacts'
 import {Messenger} from '../Messenger';
 import {User} from './';
 
-import './App.css';
-
-
 export const App: React.FC<{users: User[]}> = ({users}) => {
   const [userName, setUserName] = useState<string>('');
   const [contact, setContact] = useState<string>('');
