@@ -1,7 +1,10 @@
-import React, {useState} from 'react';
+import React from 'react';
+
+import {MessageList} from './MessageList';
+import {MessageForm} from './MessageForm';
 
 import gql from 'graphql-tag';
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks';
 
 const GET_CONVERSATION = gql`
   query chatHistory($user1: String!, $user2: String!) {
@@ -14,7 +17,7 @@ const GET_CONVERSATION = gql`
   }
 `;
 
-interface Message {
+export interface Message {
   from: string;
   to: string;
   text: string;
@@ -47,8 +50,29 @@ const SEND_MESSAGE = gql`
   }
 `;
 
+const NEW_MESSAGE_SUBSCRIPTION = gql`
+  subscription conversationSubscription($from: String!, $to: String!) {
+    newMessageInConversation(from: $from, to: $to) {
+      from
+      to
+      text
+      id
+    }
+  }
+`;
+
+interface NewMessageSubscriptionData {
+  newMessageInConversation: Message;
+}
+
+
+interface NewMessageSubscriptionVars {
+  from: string;
+  to: string;
+}
+
+
 export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
-  const [message, setMessage] = useState<string>('');
   const {loading, data} = useQuery<ConversationQueryData, ConversationQueryVars>(
     GET_CONVERSATION,
     { variables: {user1: from, user2: to}}
@@ -56,7 +80,6 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
   const [sendMessage, { error, data: newMessage}] = useMutation<{sendMessage: SendMessageInput, message: Message}>(
     SEND_MESSAGE,
     {
-      variables: {message: {from, to, text: message}},
       update: (cache: any, {data}) => {
         const {conversationHistory: messages} = cache.readQuery({
           query: GET_CONVERSATION,
@@ -70,32 +93,37 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
       }
     }
   );
+  const {error: subscriptionError} = useSubscription<NewMessageSubscriptionData, NewMessageSubscriptionVars>(
+    NEW_MESSAGE_SUBSCRIPTION,
+    {
+      variables: {from: to, to: from},
+      shouldResubscribe: false,
+      onSubscriptionData: (options) => {
+        console.log('onSubscriptionData', options);
+      }
+    }
+  );
 
-  const handleSendMessage = (e: React.FormEvent) => {
-    // Prevent form submission from reloading page
-    e.preventDefault();
-    sendMessage();
-    // Clear the message value after sending
-    setMessage('');
+  const handleSendMessage = (message: string) => {
+    const variables = {
+        message: {
+        from,
+        to,
+        text:  message
+      }
+    }; 
+    sendMessage({variables});
   };
 
   return (
     <div>
       <h2>Messages</h2>
-      {data && <ul>
-        {data.conversationHistory.map(message => (
-          <li key={message.id}>
-            {`${message.from}: ${message.text}`}
-          </li>
-        ))}
-      </ul>}
-      <form onSubmit={handleSendMessage}>
-        <label>
-          Message
-          <textarea value={message} onChange={e => setMessage(e.target.value)} />
-        </label>
-        <button>Send</button>
-      </form>
+      { data && 
+        <>
+          <MessageList messages={data!.conversationHistory} />
+          <MessageForm sendMessage={handleSendMessage} />
+        </>
+      }
     </div>
   );
 };
