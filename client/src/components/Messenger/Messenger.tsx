@@ -4,7 +4,7 @@ import {MessageList} from './MessageList';
 import {MessageForm} from './MessageForm';
 
 import gql from 'graphql-tag';
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks';
 
 const GET_CONVERSATION = gql`
   query chatHistory($user1: String!, $user2: String!) {
@@ -73,11 +73,13 @@ interface NewMessageSubscriptionVars {
 
 
 export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
-  const {subscribeToMore, data} = useQuery<ConversationQueryData, ConversationQueryVars>(
+  const {data} = useQuery<ConversationQueryData, ConversationQueryVars>(
     GET_CONVERSATION,
     { variables: {user1: from, user2: to}}
   );
-  const [sendMessage, { error, data: newMessage}] = useMutation<{sendMessage: SendMessageInput, message: Message}>(
+
+  // TODO: do something with this error
+  const [sendMessage, { error: sendMessageError}] = useMutation<{sendMessage: SendMessageInput, message: Message}>(
     SEND_MESSAGE,
     {
       update: (cache: any, {data}) => {
@@ -94,20 +96,28 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
     }
   );
 
-  // useCallback so this method is not recreated and called on every render in MessageList
-  const subscribeToNewMessages = React.useCallback(() => {
-    subscribeToMore({
-      document: NEW_MESSAGE_SUBSCRIPTION,
+  // TODO: do something with this error
+  const {error: subscriptionError} = useSubscription<NewMessageSubscriptionData, NewMessageSubscriptionVars>(
+    NEW_MESSAGE_SUBSCRIPTION,
+    {
       variables: {from: to, to: from},
-      updateQuery: (prev, {subscriptionData}: {subscriptionData: {data: {newMessageInConversation: Message}}}) => {
-        if (!subscriptionData.data) {
-          return prev;
+      onSubscriptionData: ({client, subscriptionData}) => {
+        if (subscriptionData.data && subscriptionData.data.newMessageInConversation) {
+          const data = client.readQuery({
+            query: GET_CONVERSATION,
+            variables: {user1: from,  user2: to}
+          });
+
+          const messages = data.conversationHistory || [];
+          client.writeQuery({
+            query: GET_CONVERSATION,
+            variables: {user1: from,  user2: to},
+            data: {conversationHistory: [...messages, subscriptionData.data.newMessageInConversation]}
+          });
         }
-        const newMessage = subscriptionData.data.newMessageInConversation;
-        return {...prev, conversationHistory: [...prev.conversationHistory, newMessage]};
       }
-    });
-  }, [from, to, subscribeToMore]);
+    }
+  );
 
   const handleSendMessage = (message: string) => {
     const variables = {
@@ -125,7 +135,7 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
       <h2>Messages</h2>
       { data && 
         <>
-          <MessageList messages={data!.conversationHistory} subscribeToNewMessages={subscribeToNewMessages}/>
+          <MessageList messages={data.conversationHistory}/>
           <MessageForm sendMessage={handleSendMessage} />
         </>
       }
