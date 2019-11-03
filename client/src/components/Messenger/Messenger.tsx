@@ -132,13 +132,8 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
 
   return (
     <section>
-      <h2>Messages</h2>
-      { data && 
-        <>
-          <MessageList messages={data.conversationHistory}/>
-          <MessageForm sendMessage={handleSendMessage} />
-        </>
-      }
+      <MessageList messages={data ? data.conversationHistory : []}/>
+      <MessageForm sendMessage={handleSendMessage} />
     </section>
-  );
+  )
 };
