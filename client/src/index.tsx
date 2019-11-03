@@ -1,9 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import {App} from './components';
+
 import './index.css';
-import {GraphqlProvider} from './components/GraphqlProvider';
-import App from './components/App';
 
-const Root = (<GraphqlProvider><App /></GraphqlProvider>);
-
-ReactDOM.render(Root, document.getElementById('root'));
+ReactDOM.render(<App />, document.getElementById('root'));

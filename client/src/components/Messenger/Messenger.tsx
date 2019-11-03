@@ -131,7 +131,7 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
   };
 
   return (
-    <div>
+    <section>
       <h2>Messages</h2>
       { data && 
         <>
@@ -139,6 +139,6 @@ export const Messenger: React.FC<{from: string, to: string}> = ({from, to}) => {
           <MessageForm sendMessage={handleSendMessage} />
         </>
       }
-    </div>
+    </section>
   );
 };
