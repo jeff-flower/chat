@@ -3,7 +3,13 @@ import { User } from '../App';
 
 import './UserSelection.css';
 
-export const UserSelection: React.FC<{users: User[]; selectedUser: User['username']; onSelectUser: (userName: User['username']) => void;}> = ({users, selectedUser, onSelectUser}) => {
+export interface UserSelectionProps {
+  users: User[];
+  selectedUser: User['username'];
+  onSelectUser: (userName: User['username']) => void;
+}
+
+export const UserSelection: React.FC<UserSelectionProps> = ({users, selectedUser, onSelectUser}) => {
   return (
     <div className="user-selection">
       {!selectedUser && (
@@ -13,6 +19,7 @@ export const UserSelection: React.FC<{users: User[]; selectedUser: User['usernam
             value={selectedUser}
             onChange={e => onSelectUser(e.target.value)}
             className="user-selection__select-user"
+            data-testid="userSelection"
           >
             <option value=""></option>
             {users.map(user => <option value={user.username} key={user.username}>{user.username}</option>)}
