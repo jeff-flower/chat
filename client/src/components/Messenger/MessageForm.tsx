@@ -2,7 +2,11 @@ import React, {useState} from 'react';
 
 import './MessageForm.css';
 
-export const MessageForm: React.FC<{sendMessage: (message: string) => void}> = ({sendMessage}) => {
+export interface MessageFormProps {
+  sendMessage: (message: string) => void;
+}
+
+export const MessageForm: React.FC<MessageFormProps> = ({sendMessage}) => {
   const [message, setMessage] = useState<string>('');
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -19,6 +23,7 @@ export const MessageForm: React.FC<{sendMessage: (message: string) => void}> = (
         value={message}
         onChange={e => setMessage(e.target.value)}
         className="message-text"
+        data-testid="messageFormText"
       />
       <button>Send Message</button>
     </form>
